@@ -30,6 +30,7 @@
 #include "VoxelSet.h"
 #include "VoxelSubset.h"
 
+
 namespace boundingmesh {
 
 class SegmenterDownsampling {
@@ -114,9 +115,11 @@ private:
 	Real rateSplit(VoxelSubset & inputSet, Split split,
 			const Vector3 & preferredCuttingDirection, const Real w,
 			const Real alpha, const Real beta, const Real delta);
+
 	Real rateSplit2(VoxelSubset & inputSet, Split split,
 			const Vector3 & preferredCuttingDirection, const Real w,
 			const Real alpha, const Real beta, const Real delta);
+
 	Real rateSplit3(VoxelSubset & inputSet, Split split,
 			const Vector3 & preferredCuttingDirection, const Real w,
 			const Real alpha, const Real beta, const Real delta);
@@ -129,5 +132,4 @@ private:
 };
 
 }
-
 #endif //BOUNDINGMESH_SEGMENTER_DOWNSAMPLING_H

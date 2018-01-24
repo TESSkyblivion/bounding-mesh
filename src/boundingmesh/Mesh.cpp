@@ -71,6 +71,8 @@
 	typedef K::Point_3                                Point_3;
 	typedef Polyhedron_3::Facet_iterator                   Facet_iterator;
 	typedef Polyhedron_3::Halfedge_around_facet_circulator Halfedge_facet_circulator;
+#else
+#include <QuickHull.hpp>
 #endif
 
 #ifdef QHULL_AVAILABLE
@@ -1384,6 +1386,7 @@ Convex::Convex(const Convex& other) :
 		mesh(other.mesh), volume(other.volume) {
 }
 
+#ifdef CGAL_AVAILABLE
 Convex::Convex(const std::vector<Vector3>& points) {
 	std::vector<Point_3> cgal_points;
 	for (unsigned int i = 0; i < points.size(); ++i) {
@@ -1422,6 +1425,43 @@ Convex::Convex(const std::vector<Vector3>& points) {
 
 	volume = mesh->calculateConvexVolume();
 }
+#else 
+Convex::Convex(const std::vector<Vector3>& points) {
+
+	quickhull::QuickHull<float> qh;
+	std::vector<quickhull::Vector3<float>> pointCloud;
+	for (Vector3 point : points)
+		pointCloud.push_back(quickhull::Vector3<float>(point(0), point(1), point(2)));
+	auto hull = qh.getConvexHull(pointCloud, true, false);
+	auto indexBuffer = hull.getIndexBuffer();
+	auto vertexBuffer = hull.getVertexBuffer();
+
+	mesh = std::make_shared<Mesh>();
+	VertexPositionSet vertices(mesh.get());
+
+	for (int i = 0; i < indexBuffer.size() / 3; i += 3) {
+		Index indices[3];
+		for (int j=0; j<3; j++) {
+			Vector3 position;
+			position(0) = vertexBuffer[indexBuffer[i+j]].x;
+			position(1) = vertexBuffer[indexBuffer[i+j]].y;
+			position(2) = vertexBuffer[indexBuffer[i+j]].z;
+			indices[j] = vertices.addVertex(position);
+		};
+
+		if (indices[0] == indices[1] || indices[0] == indices[2]
+			|| indices[1] == indices[2]) {
+			std::cout << "Borked indices in convex hull computation " << indices[0] << " " << indices[1]
+				<< " " << indices[2] << std::endl;
+			continue;
+		}
+
+		mesh->addTriangle(indices[0], indices[1], indices[2]);
+	}
+
+	volume = mesh->calculateConvexVolume();
+}
+#endif
 
 Convex::~Convex() {
 }
