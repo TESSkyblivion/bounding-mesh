@@ -802,7 +802,7 @@ void SegmenterDownsampling::setMesh(std::shared_ptr<Mesh> mesh,
 	int count = 1;
 	double length = 100;
 	VoxelSet set;
-	while (count < min_voxel_count * 0.9 || count > min_voxel_count * 1.1) {
+	while (length > 0.00001 && (count < min_voxel_count * 0.9 || count > min_voxel_count * 1.1)) {
 		set = VoxelSet(mesh, length, true);
 		count = set.nVoxels();
 		//std::cout << "count: " << count << " length: " << length << std::endl;
@@ -905,7 +905,14 @@ void VoxelSubset::ComputePrincipalAxes() {
 	Eigen::JacobiSVD< Eigen::Matrix<double, 3, 3> > svd(covMatEigen);
 	// covMatEigen = Q*D*QT
 	D_.setZero();
-	D_.diagonal().head(svd.nonzeroSingularValues()) = svd.singularValues();
+	int svds = svd.nonzeroSingularValues();
+	if (svds > 0) {
+		Eigen::Vector3d svdv = svd.singularValues();
+		for (int i = 0; i < svds; i++) {
+			D_(i, i) = svdv(i);
+		}
+	}
+	//D_.diagonal().head(svd.nonzeroSingularValues()) = svd.singularValues();
 }
 
 Real VoxelSubset::GetEigenValue(int axis) const {

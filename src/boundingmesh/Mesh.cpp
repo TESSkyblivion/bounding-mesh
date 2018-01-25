@@ -1439,15 +1439,23 @@ Convex::Convex(const std::vector<Vector3>& points) {
 	mesh = std::make_shared<Mesh>();
 	VertexPositionSet vertices(mesh.get());
 
+	for (int i = 0; i < vertexBuffer.size(); i++) {
+		mesh->addVertex(Vector3(vertexBuffer[i].x, vertexBuffer[i].y, vertexBuffer[i].z));
+	}
+
 	for (int i = 0; i < indexBuffer.size() / 3; i++) {
 		Index indices[3];
-		for (int j=0; j<3; j++) {
+		/*for (int j=0; j<3; j++) {
 			Vector3 position;
 			position(0) = vertexBuffer[indexBuffer[i*3+j]].x;
 			position(1) = vertexBuffer[indexBuffer[i*3+j]].y;
 			position(2) = vertexBuffer[indexBuffer[i*3+j]].z;
 			indices[j] = vertices.addVertex(position);
-		};
+		};*/
+
+		indices[0] = indexBuffer[i * 3];
+		indices[1] = indexBuffer[i * 3 + 1];
+		indices[2] = indexBuffer[i * 3 + 2];
 
 		if (indices[0] == indices[1] || indices[0] == indices[2]
 			|| indices[1] == indices[2]) {
