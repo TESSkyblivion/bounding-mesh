@@ -181,10 +181,7 @@ namespace boundingmesh
 		collectRemovalData(edge.vertex(0), edge.vertex(1), edges_to_remove, hole_border);
 		collectRemovalData(edge.vertex(1), edge.vertex(0), edges_to_remove, hole_border);
 
-		for(std::set<Index>::iterator it = edges_to_remove.begin(); it != edges_to_remove.end(); ++it)
-		{
-			queue_.remove(*it);
-		}
+
 
 		result_mesh_->removeVertex(edge.vertex(0));
 		result_mesh_->removeVertex(edge.vertex(1));
@@ -205,6 +202,12 @@ namespace boundingmesh
 			for(unsigned int j = 0; j < 3; ++j)
 				edges_to_add.insert(triangle.edge(j));
 		}
+
+		for (std::set<Index>::iterator it = edges_to_remove.begin(); it != edges_to_remove.end(); ++it)
+		{
+			queue_.remove(*it);
+		}
+
 		for(std::set<Index>::iterator it = edges_to_add.begin(); it != edges_to_add.end(); ++it)
 		{
 			queue_.insert(computeEdgeContraction(*it));	
