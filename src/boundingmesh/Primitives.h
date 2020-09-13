@@ -100,17 +100,19 @@ namespace boundingmesh
 		friend class Mesh;
 	public:
 		Triangle();
-		Triangle(Index vertex_1, Index vertex_2, Index vertex_3);
+		Triangle(Index vertex_1, Index vertex_2, Index vertex_3, int material);
 		
 		Index vertex(unsigned int i) const;
 		Index edge(unsigned int i) const;
 		Plane plane() const;
+		int material() const;
 
 		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	private:
 		Index vertices_[3];
 		Index edges_[3];
 		Plane plane_;
+		int material_;
 	};
 }
 

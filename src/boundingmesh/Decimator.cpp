@@ -183,14 +183,18 @@ namespace boundingmesh
 
 
 
+		//TODO: material policy
+		int material = result_mesh_->triangle(result_mesh_->vertex(hole_border[0][0]).triangle(0)).material();
+
 		result_mesh_->removeVertex(edge.vertex(0));
 		result_mesh_->removeVertex(edge.vertex(1));
 
+		
 		// Then insert new vertex and connect it correctly
 		Index new_vertex_index = result_mesh_->addVertex(contraction.new_point());
 		for(unsigned int i = 0; i < hole_border.size(); ++i)
 		{
-			result_mesh_->addTriangle(new_vertex_index, hole_border[i][0], hole_border[i][1]);
+			result_mesh_->addTriangle(new_vertex_index, hole_border[i][0], hole_border[i][1], material);
 			delete hole_border[i];
 		}
 

@@ -83,7 +83,7 @@ namespace boundingmesh
 	public:
 		Mesh();
 		Mesh(const Mesh& mesh);
-		Mesh(const std::vector<Vector3>& vertices,const std::vector<Index*>& triangles);
+		Mesh(const std::vector<Vector3>& vertices,const std::vector<Index*>& triangles, const std::vector<int>& materials);
 		~Mesh();
 		
 		Mesh& operator=(Mesh other);
@@ -112,7 +112,7 @@ namespace boundingmesh
 		const Triangle& triangle(Index i) const;
 
 		Index addVertex(const Vector3& vertex);
-		Index addTriangle(Index vertex1, Index vertex2, Index vertex3);
+		Index addTriangle(Index vertex1, Index vertex2, Index vertex3, int material);
 
 		Real getBoundingBoxDiagonal();
 

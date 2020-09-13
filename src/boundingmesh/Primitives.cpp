@@ -159,9 +159,11 @@ namespace boundingmesh
 		edges_[0] = 0;
 		edges_[1] = 0;
 		edges_[2] = 0;
+
+		material_ = -1;
 	}
 	
-	Triangle::Triangle(Index vertex_1, Index vertex_2, Index vertex_3)
+	Triangle::Triangle(Index vertex_1, Index vertex_2, Index vertex_3, int material)
 	: plane_()
 	{
 		vertices_[0] = vertex_1;
@@ -171,6 +173,8 @@ namespace boundingmesh
 		edges_[0] = 0;
 		edges_[1] = 0;
 		edges_[2] = 0;
+
+		material_ = material;
 	}
 
 	Index Triangle::vertex(unsigned int i) const
@@ -186,5 +190,10 @@ namespace boundingmesh
 	Plane Triangle::plane() const
 	{
 		return plane_;
+	}
+
+	int Triangle::material() const
+	{
+		return material_;
 	}
 }

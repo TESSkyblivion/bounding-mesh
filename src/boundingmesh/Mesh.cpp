@@ -160,12 +160,13 @@ Mesh::Mesh(const Mesh& mesh) {
 }
 
 Mesh::Mesh(const std::vector<Vector3>& vertices,
-		const std::vector<Index*>& triangles) {
+		const std::vector<Index*>& triangles,
+		const std::vector<int>& materials ) {
 	for (unsigned int i = 0; i < vertices.size(); ++i)
 		addVertex(vertices[i]);
 
 	for (unsigned int i = 0; i < triangles.size(); ++i)
-		addTriangle(triangles[i][0], triangles[i][1], triangles[i][2]);
+		addTriangle(triangles[i][0], triangles[i][1], triangles[i][2], materials[i]);
 }
 
 Mesh::~Mesh() {
@@ -258,7 +259,7 @@ void Mesh::loadOff(const std::string& filename) {
 						|| c > vertices_.size())
 					std::cout << "Error reading .off file: invalid index"
 							<< std::endl;
-				addTriangle(a, b, c);
+				addTriangle(a, b, c, -1);
 			} else {
 				std::cout
 						<< "Error reading .off file: Reading face with more than 3 vertices"
@@ -321,7 +322,7 @@ void Mesh::loadObj(const std::string& filename) {
 					|| c > vertices_.size())
 				std::cout << "Error reading .off file: invalid index"
 						<< std::endl;
-			addTriangle(a, b, c);
+			addTriangle(a, b, c, -1);
 		}
 	}
 	n_original = vertices_.size();
@@ -472,7 +473,7 @@ void Mesh::loadStl(const std::string& filename) {
 			}
 			if (!(indices[0] == indices[1] || indices[0] == indices[2]
 					|| indices[1] == indices[2]))
-				addTriangle(indices[0], indices[1], indices[2]);
+				addTriangle(indices[0], indices[1], indices[2], -1);
 			file.seekg(2, file.cur);
 		}
 		file.close();
@@ -543,7 +544,7 @@ void Mesh::loadStl(const std::string& filename) {
 							<< ", " << indices[1] << ", " << indices[2]
 							<< std::endl;
 				else
-					addTriangle(indices[0], indices[1], indices[2]);
+					addTriangle(indices[0], indices[1], indices[2], -1);
 				std::getline(file, line);
 				line.erase(0, line.find_first_not_of(' '));
 				if (line != "endloop") {
@@ -745,7 +746,8 @@ std::vector<std::shared_ptr<Mesh> > Mesh::computeSubmeshes() {
 			connected_mesh->addTriangle(
 					mapped_vertex_indices[next_triangle.vertex(0)],
 					mapped_vertex_indices[next_triangle.vertex(1)],
-					mapped_vertex_indices[next_triangle.vertex(2)]);
+					mapped_vertex_indices[next_triangle.vertex(2)],
+					next_triangle.material());
 			triangles_to_add.pop();
 		}
 
@@ -880,7 +882,7 @@ Index Mesh::addVertex(const Vector3& position) {
 	return new_index;
 }
 
-Index Mesh::addTriangle(Index vertex1, Index vertex2, Index vertex3) {
+Index Mesh::addTriangle(Index vertex1, Index vertex2, Index vertex3, int material) {
 	assert(vertex1 < vertices_.size());
 	assert(vertex2 < vertices_.size());
 	assert(vertex3 < vertices_.size());
@@ -897,7 +899,7 @@ Index Mesh::addTriangle(Index vertex1, Index vertex2, Index vertex3) {
 		triangles_.push_back(Triangle());
 	}
 
-	Triangle triangle = Triangle(vertex1, vertex2, vertex3);
+	Triangle triangle = Triangle(vertex1, vertex2, vertex3, material);
 	n_valid_triangles_++;
 
 	triangle.plane_ = Plane(vertices_[vertex1].position_,
@@ -1083,9 +1085,12 @@ void Mesh::closeHoles() {
 			mean /= 2.0 * currentHoleEdges.size();
 			Index centerVertex = addVertex(mean);
 
+			//TODO: material policy
+			int material = triangle(vertex(edges_[currentHoleEdges[0]].vertices_[0]).triangle(0)).material();
+
 			//Fill the whole by adding the necessary triangles
 			for (int j = 0; j < currentHoleEdges.size(); j++) {
-				addTriangle(edges_[currentHoleEdges[j]].vertices_[0], edges_[currentHoleEdges[j]].vertices_[1], centerVertex);
+				addTriangle(edges_[currentHoleEdges[j]].vertices_[0], edges_[currentHoleEdges[j]].vertices_[1], centerVertex, material);
 			}
 			std::cout << "Filled hole with " << currentHoleEdges.size() << " vertices" << std::endl;
 			done = true;
@@ -1464,7 +1469,7 @@ Convex::Convex(const std::vector<Vector3>& points) {
 			continue;
 		}
 
-		mesh->addTriangle(indices[0], indices[1], indices[2]);
+		mesh->addTriangle(indices[0], indices[1], indices[2], -1);
 	}
 
 	volume = mesh->calculateConvexVolume();
